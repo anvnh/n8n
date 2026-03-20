@@ -11,7 +11,8 @@ services:
       - NODE_ENV=production
       - WEBHOOK_URL=pleasing-bluebird-randomly.ngrok-free.app
     volumes:
-      - n8n_data:/home/node/.n8n
+      - ./n8n_data:/home/node/.n8n
+      - ./workflows:/home/node/workflows
 
 volumes:
   n8n_data:
