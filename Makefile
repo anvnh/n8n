@@ -6,3 +6,7 @@ import-workflow:
 	docker compose exec n8n n8n import:workflow --separate --input=/home/node/workflows/
 export-workflow:
 	docker compose exec n8n n8n export:workflow --all --separate --output=/home/node/workflows/
+export-cre:
+	docker compose exec n8n n8n export:credentials --all --output=/home/node/workflows/credentials.json
+import-cre:
+	docker compose exec n8n n8n import:credentials --input=/home/node/workflows/credentials.json
