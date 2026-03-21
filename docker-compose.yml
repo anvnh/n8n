@@ -29,6 +29,13 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
+  # redis
+  redis:
+    image: redis:alpine
+    container_name: redis_cache
+    restart: always
+    ports:
+      - "6379:6379"
 
   # n8n
   n8n:
