@@ -49,7 +49,7 @@ services:
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
       - NODE_ENV=production
-      - WEBHOOK_URL=pleasing-bluebird-randomly.ngrok-free.app
+      - WEBHOOK_URL=https://n8naan.duckdns.org:5678
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
       - DB_POSTGRESDB_PORT=5432
