@@ -45,11 +45,23 @@ services:
     ports:
       - "5678:5678"
     environment:
-      - N8N_HOST=localhost
+      # - N8N_HOST=localhost
+      # - N8N_PORT=5678
+      # - N8N_PROTOCOL=http
+      # - NODE_ENV=production
+      # - WEBHOOK_URL=https://n8naan.duckdns.org:5678
+      # - DB_TYPE=postgresdb
+      # - DB_POSTGRESDB_HOST=postgres
+      # - DB_POSTGRESDB_PORT=5432
+      # - DB_POSTGRESDB_DATABASE=finance_db
+      # - DB_POSTGRESDB_USER=n8n_user
+      # - DB_POSTGRESDB_PASSWORD=n8n_password
+
+      - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_PROTOCOL=https
       - NODE_ENV=production
-      - WEBHOOK_URL=https://n8naan.duckdns.org:5678
+      - WEBHOOK_URL=https://n8naan.duckdns.org/
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
       - DB_POSTGRESDB_PORT=5432
