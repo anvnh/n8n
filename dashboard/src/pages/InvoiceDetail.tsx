@@ -18,8 +18,7 @@ export default function InvoiceDetail() {
       <div>
         <button className="btn btn-ghost btn-sm mb-16" onClick={() => navigate(-1)}>← Back</button>
         <div className="card" style={{ textAlign: 'center', padding: 48 }}>
-          <div style={{ fontSize: 40 }}>🔍</div>
-          <p style={{ marginTop: 8, color: 'var(--text-muted)' }}>Invoice <strong>{id}</strong> not found.</p>
+          <p style={{ color: 'var(--text-muted)' }}>Invoice <strong>{id}</strong> not found.</p>
         </div>
       </div>
     )
@@ -31,10 +30,10 @@ export default function InvoiceDetail() {
     try {
       if (action === 'approve') await approveInvoice(invoice.invoiceId)
       else await rejectInvoice(invoice.invoiceId)
-      setFeedback(`✅ Invoice ${action}d. n8n workflow triggered.`)
+      setFeedback(`Invoice ${action}d. n8n workflow triggered.`)
       setTimeout(() => { qc.invalidateQueries({ queryKey: ['invoices'] }); navigate('/invoices') }, 1500)
     } catch {
-      setFeedback(`❌ Failed — check n8n webhook at /webhook/approve-invoice`)
+      setFeedback(`Failed — check n8n webhook at /webhook/approve-invoice`)
     } finally {
       setLoading(null)
     }
@@ -67,6 +66,8 @@ export default function InvoiceDetail() {
               { label: 'Sender Email', value: invoice.sender },
               { label: 'Received Date', value: invoice.receivedDate },
               { label: 'Amount', value: `$${invoice.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
+              { label: 'Priority', value: invoice.priority || 'Normal' },
+              { label: 'Payment Date', value: invoice.paymentDate || '—' },
               { label: 'Transaction ID', value: invoice.transactionId || '—' },
             ].map(({ label, value }) => (
               <div key={label} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: 12 }}>
@@ -74,7 +75,21 @@ export default function InvoiceDetail() {
                 <span className="font-semibold text-sm">{value}</span>
               </div>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            
+            <div className="card-title mt-16 mb-8" style={{ borderTop: '1px solid var(--border-color)', paddingTop: 16 }}>Banking Info</div>
+            {[
+              { label: 'Bank Name', value: invoice.bankName || '—' },
+              { label: 'Bank Code', value: invoice.bankCode || '—' },
+              { label: 'Account Name', value: invoice.accountName || '—' },
+              { label: 'Account #', value: invoice.accountNumber || '—' },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 8 }}>
+                <span className="text-muted text-sm">{label}</span>
+                <span className="font-semibold text-sm">{value}</span>
+              </div>
+            ))}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
               <span className="text-muted text-sm">Status</span>
               <span className={`badge ${statusCls[invoice.status]}`}>{invoice.status}</span>
             </div>
@@ -92,11 +107,10 @@ export default function InvoiceDetail() {
                   borderRadius: 'var(--radius-md)', padding: '32px', textAlign: 'center',
                   marginBottom: 16,
                 }}>
-                  <div style={{ fontSize: 40 }}>📄</div>
-                  <div className="text-muted text-sm mt-8">Invoice document on Google Drive</div>
+                  <div className="text-muted text-sm">Invoice document on Google Drive</div>
                 </div>
                 <a href={invoice.driveLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                  📎 Open in Google Drive
+                  Open in Google Drive
                 </a>
               </div>
             ) : (
@@ -117,7 +131,7 @@ export default function InvoiceDetail() {
                   onClick={() => doAction('approve')}
                   disabled={!!loading}
                 >
-                  {loading === 'approve' ? '⏳ Processing…' : '✓ Approve Invoice'}
+                  {loading === 'approve' ? 'Processing…' : 'Approve Invoice'}
                 </button>
                 <button
                   className="btn btn-danger"
@@ -125,7 +139,7 @@ export default function InvoiceDetail() {
                   onClick={() => doAction('reject')}
                   disabled={!!loading}
                 >
-                  {loading === 'reject' ? '⏳ Processing…' : '✗ Reject Invoice'}
+                  {loading === 'reject' ? 'Processing…' : 'Reject Invoice'}
                 </button>
               </div>
             </div>

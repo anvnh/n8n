@@ -8,12 +8,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/n8n-api': {
-        target: 'https://pleasing-bluebird-randomly.ngrok-free.app',
+        target: 'https://n8naan.duckdns.org',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/n8n-api/, ''),
       },
       '/webhook': {
-        target: 'https://pleasing-bluebird-randomly.ngrok-free.app',
+        target: 'https://n8naan.duckdns.org',
         changeOrigin: true,
       },
     },

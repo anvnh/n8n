@@ -5,16 +5,16 @@ const navItems = [
   {
     group: 'Main',
     items: [
-      { to: '/',          icon: '⊞', label: 'Dashboard' },
-      { to: '/invoices',  icon: '🧾', label: 'Invoices' },
-      { to: '/workflows', icon: '⚡', label: 'Workflows' },
+      { to: '/',          label: 'Dashboard' },
+      { to: '/invoices',  label: 'Invoices' },
+      { to: '/vendors',   label: 'Vendors' },
     ],
   },
   {
-    group: 'Analytics',
+    group: 'Analytics & Tracking',
     items: [
-      { to: '/reports', icon: '📊', label: 'Reports' },
-      { to: '/logs',    icon: '📋', label: 'Logs' },
+      { to: '/reports',    label: 'Reports' },
+      { to: '/error-logs', label: 'Error Logs' },
     ],
   },
 ]
@@ -27,8 +27,8 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-brand-logo">
-          <div className="sidebar-brand-icon">n8</div>
+        <div className="">
+         
           <div>
             <div className="sidebar-brand-text">n8n Admin</div>
             <div className="sidebar-brand-sub">Dashboard v1.0</div>
@@ -51,8 +51,7 @@ export default function Sidebar() {
                   to={item.to}
                   className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                 >
-                  <span className="sidebar-nav-icon">{item.icon}</span>
-                  <span>{item.label}</span>
+                  <span style={{ marginLeft: isActive ? '8px' : '0', transition: 'margin 0.3s ease' }}>{item.label}</span>
                   {item.to === '/invoices' && pendingCount > 0 && (
                     <span className="sidebar-nav-badge">{pendingCount}</span>
                   )}
@@ -64,8 +63,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <span className="sidebar-status-dot" />
-        n8n @ localhost:5678
+        n8n via VPS
       </div>
     </aside>
   )

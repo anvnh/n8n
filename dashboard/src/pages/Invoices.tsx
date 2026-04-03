@@ -60,7 +60,7 @@ export default function Invoices() {
       {feedback && (
         <div className={feedback.type === 'success' ? 'badge badge-approved' : 'error-state'}
           style={{ display: 'block', marginBottom: 16, padding: '12px 16px', borderRadius: 8, fontSize: 14 }}>
-          {feedback.type === 'success' ? '✅ ' : '❌ '}{feedback.msg}
+          {feedback.msg}
         </div>
       )}
 
@@ -80,9 +80,9 @@ export default function Invoices() {
       <div className="card" style={{ padding: 0 }}>
         <div className="filter-bar" style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
           <div className="search-wrap">
-            <span className="search-icon">🔍</span>
             <input
               className="input search-input"
+              style={{ paddingLeft: 14 }}
               placeholder="Search by ID or sender…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -94,7 +94,7 @@ export default function Invoices() {
           <div className="spinner-wrap"><div className="spinner" /><span>Loading invoices…</span></div>
         ) : error ? (
           <div style={{ padding: 20 }}>
-            <div className="error-state">⚠️ Using mock data — n8n webhook not reachable.</div>
+            <div className="error-state">Error fetching invoices.</div>
           </div>
         ) : null}
 
@@ -107,6 +107,7 @@ export default function Invoices() {
                 <th>Sender</th>
                 <th>Date</th>
                 <th>Amount</th>
+                <th>Priority</th>
                 <th>Status</th>
                 <th>Drive</th>
                 <th>Actions</th>
@@ -120,15 +121,16 @@ export default function Invoices() {
                       {inv.invoiceId}
                     </Link>
                   </td>
-                  <td className="text-sm font-medium">{inv.vendor}</td>
+                  <td className="text-sm font-medium">{inv.vendorId || '—'}</td>
                   <td className="text-sm">{inv.sender}</td>
-                  <td className="text-sm text-muted">{inv.receivedDate}</td>
+                  <td className="text-sm text-muted">{inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : inv.receivedDate}</td>
                   <td className="font-semibold">${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                  <td><span className="badge badge-inactive">{inv.priority || 'Normal'}</span></td>
                   <td><InvoiceBadge status={inv.status} /></td>
                   <td>
                     {inv.driveLink ? (
                       <a href={inv.driveLink} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
-                        📎 View
+                        View
                       </a>
                     ) : '—'}
                   </td>
@@ -140,14 +142,14 @@ export default function Invoices() {
                           onClick={() => doAction(inv.invoiceId, 'approve')}
                           disabled={loading === `${inv.invoiceId}-approve`}
                         >
-                          {loading === `${inv.invoiceId}-approve` ? '…' : '✓ Approve'}
+                          {loading === `${inv.invoiceId}-approve` ? '…' : 'Approve'}
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => doAction(inv.invoiceId, 'reject')}
                           disabled={loading === `${inv.invoiceId}-reject`}
                         >
-                          {loading === `${inv.invoiceId}-reject` ? '…' : '✗ Reject'}
+                          {loading === `${inv.invoiceId}-reject` ? '…' : 'Reject'}
                         </button>
                       </div>
                     ) : (
@@ -158,7 +160,6 @@ export default function Invoices() {
               )) : (
                 <tr>
                   <td colSpan={8} className="table-empty">
-                    <div className="empty-icon">🧾</div>
                     <p>No invoices match your filter.</p>
                   </td>
                 </tr>
