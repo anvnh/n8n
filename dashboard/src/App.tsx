@@ -5,9 +5,9 @@ import Topbar from './components/layout/Topbar'
 import Dashboard from './pages/Dashboard'
 import Invoices from './pages/Invoices'
 import InvoiceDetail from './pages/InvoiceDetail'
-import Workflows from './pages/Workflows'
+import Vendors from './pages/Vendors'
 import Reports from './pages/Reports'
-import Logs from './pages/Logs'
+import ErrorLogs from './pages/ErrorLogs'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,9 +31,9 @@ export default function App() {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/invoices/:id" element={<InvoiceDetail />} />
-                <Route path="/workflows" element={<Workflows />} />
+                <Route path="/vendors" element={<Vendors />} />
                 <Route path="/reports" element={<Reports />} />
-                <Route path="/logs" element={<Logs />} />
+                <Route path="/error-logs" element={<ErrorLogs />} />
               </Routes>
             </main>
           </div>

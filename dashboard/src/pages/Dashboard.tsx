@@ -1,15 +1,15 @@
-import { useWorkflows } from '../hooks/useWorkflows'
-import { useExecutions } from '../hooks/useExecutions'
 import { useInvoices } from '../hooks/useInvoices'
+import { useQuery } from '@tanstack/react-query'
+import { getVendors } from '../api/vendors'
+import { getErrorLogs } from '../api/errorLogs'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
 
 function StatCard({
-  icon, label, value, sub, color,
-}: { icon: string; label: string; value: string | number; sub?: string; color: string }) {
+  label, value, sub
+}: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="card">
-      <div className={`stat-icon ${color}`}>{icon}</div>
       <div className="card-title">{label}</div>
       <div className="card-value">{value}</div>
       {sub && <div className="card-sub">{sub}</div>}
@@ -17,86 +17,62 @@ function StatCard({
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    success: 'badge badge-success', error: 'badge badge-error',
-    running: 'badge badge-running', waiting: 'badge badge-running',
-    canceled: 'badge badge-inactive',
-  }
-  return <span className={map[status] || 'badge badge-inactive'}>{status}</span>
-}
-
 export default function Dashboard() {
-  const { data: workflows, isLoading: wfLoading, error: wfError } = useWorkflows()
-  const { data: executions, isLoading: exLoading } = useExecutions({ limit: 5 })
-  const { data: invoices } = useInvoices()
+  const { data: invoices, isLoading: invLoading } = useInvoices()
+  const { data: vendors, isLoading: venLoading } = useQuery({ queryKey: ['vendors'], queryFn: getVendors })
+  const { data: errorLogs, isLoading: errLoading } = useQuery({ queryKey: ['error_logs'], queryFn: getErrorLogs })
 
-  const activeWorkflows = workflows?.filter((w) => w.active).length ?? 0
-  const pendingInvoices = invoices?.filter((i) => i.status === 'Pending').length ?? 0
-  const successCount = executions?.filter((e) => e.status === 'success').length ?? 0
-  const errorCount = executions?.filter((e) => e.status === 'error').length ?? 0
+  const pendingInvoices = invoices?.filter((i) => i.status === 'Pending').length || 0
+  const vendorsCount = vendors?.length || 0
+  const errorLogsCount = errorLogs?.length || 0
 
   return (
     <div>
       <div className="page-header">
         <h1>Dashboard</h1>
-        <p>System overview — n8n workflow automation hub</p>
+        <p>Finance Data overview synced from Postgres</p>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-4 mb-24">
-        <StatCard icon="⚡" label="Active Workflows" value={wfLoading ? '…' : activeWorkflows}
-          sub={`of ${workflows?.length ?? 0} total`} color="purple" />
-        <StatCard icon="🧾" label="Pending Invoices" value={pendingInvoices}
-          sub="Awaiting approval" color="amber" />
-        <StatCard icon="✅" label="Successful Runs" value={exLoading ? '…' : successCount}
-          sub="Recent executions" color="green" />
-        <StatCard icon="❌" label="Failed Runs" value={exLoading ? '…' : errorCount}
-          sub="Needs attention" color="red" />
+        <StatCard label="Registered Vendors" value={venLoading ? '…' : vendorsCount} sub="Synced from Postgres" />
+        <StatCard label="Pending Invoices" value={pendingInvoices} sub="Awaiting approval" />
+        <StatCard label="Total Invoices" value={invLoading ? '…' : (invoices?.length || 0)} sub="All time record" />
+        <StatCard label="System Errors" value={errLoading ? '…' : errorLogsCount} sub="Check logs for details" />
       </div>
 
-      <div className="grid grid-2-1">
-        {/* Recent Executions */}
+      <div className="grid grid-2 mb-24" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 24 }}>
+        {/* Recent Error Logs */}
         <div className="card">
           <div className="flex-between mb-16">
-            <div className="card-title" style={{ marginBottom: 0 }}>Recent Executions</div>
-            <Link to="/logs" className="btn btn-ghost btn-sm">View all →</Link>
+            <div className="card-title" style={{ marginBottom: 0 }}>Recent Error Logs</div>
+            <Link to="/error-logs" className="btn btn-ghost btn-sm">View all →</Link>
           </div>
-          {exLoading ? (
+          {errLoading ? (
             <div className="spinner-wrap"><div className="spinner" /></div>
           ) : (
             <div className="table-wrap">
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Workflow</th>
-                    <th>Status</th>
-                    <th>Started</th>
-                    <th>Duration</th>
+                    <th>Invoice ID</th>
+                    <th>Message</th>
+                    <th>Time</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {executions && executions.length > 0 ? (
-                    executions.slice(0, 5).map((ex) => {
-                      const dur = ex.stoppedAt && ex.startedAt
-                        ? Math.round((new Date(ex.stoppedAt).getTime() - new Date(ex.startedAt).getTime()) / 1000)
-                        : null
-                      return (
-                        <tr key={ex.id}>
-                          <td className="font-semibold">{ex.workflowData?.name || `WF #${ex.workflowId}`}</td>
-                          <td><StatusBadge status={ex.status} /></td>
-                          <td className="text-sm text-muted">
-                            {ex.startedAt ? format(new Date(ex.startedAt), 'MMM d, HH:mm') : '—'}
-                          </td>
-                          <td className="text-sm text-muted">{dur != null ? `${dur}s` : '—'}</td>
-                        </tr>
-                      )
-                    })
+                  {errorLogs && errorLogs.length > 0 ? (
+                    errorLogs.slice(0, 5).map((log) => (
+                      <tr key={log.id}>
+                        <td className="font-semibold text-accent">{log.invoice_id || '—'}</td>
+                        <td className="text-sm truncate" style={{ maxWidth: 200 }}>{log.error_message}</td>
+                        <td className="text-sm text-muted">
+                          {log.created_at ? format(new Date(log.created_at), 'MMM d, HH:mm') : '—'}
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
-                      <td colSpan={4} className="table-empty">No executions found.<br />
-                        <span className="text-xs">Connect n8n to see live data.</span>
-                      </td>
+                      <td colSpan={3} className="table-empty">No errors found. System is healthy.</td>
                     </tr>
                   )}
                 </tbody>
@@ -113,12 +89,11 @@ export default function Dashboard() {
           </div>
           {pendingInvoices === 0 ? (
             <div className="empty-state" style={{ padding: '24px' }}>
-              <div className="empty-icon">🎉</div>
-              <p>All invoices reviewed!</p>
+              <p>All invoices reviewed.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {invoices?.filter((i) => i.status === 'Pending').slice(0, 4).map((inv) => (
+              {invoices?.filter((i) => i.status === 'Pending').slice(0, 6).map((inv) => (
                 <Link
                   key={inv.invoiceId}
                   to={`/invoices/${inv.invoiceId}`}
@@ -133,30 +108,11 @@ export default function Dashboard() {
                     <div className="font-semibold text-sm">{inv.invoiceId}</div>
                     <div className="text-xs text-muted">{inv.sender}</div>
                   </div>
-                  <div className="text-accent font-bold text-sm">${inv.amount.toLocaleString()}</div>
+                  <div className="text-accent font-bold text-sm">
+                    ${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
                 </Link>
               ))}
-            </div>
-          )}
-
-          {/* Workflow Health */}
-          <div className="divider" />
-          <div className="card-title">Workflow Health</div>
-          {wfError ? (
-            <div className="text-xs text-muted">⚠️ n8n offline — using mock data</div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {(workflows?.slice(0, 5) ?? []).map((wf) => (
-                <div key={wf.id} className="flex-between" style={{ fontSize: 13 }}>
-                  <span className="truncate" style={{ maxWidth: 140 }}>{wf.name}</span>
-                  <span className={`badge badge-${wf.active ? 'active' : 'inactive'}`} style={{ fontSize: 11 }}>
-                    {wf.active ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-              ))}
-              {!wfLoading && (workflows?.length ?? 0) === 0 && (
-                <span className="text-xs text-muted">No workflows found</span>
-              )}
             </div>
           )}
         </div>
