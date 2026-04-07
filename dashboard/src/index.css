@@ -876,3 +876,14 @@ img { max-width: 100%; }
   background: var(--bg-secondary);
   color: var(--text-primary);
 }
+
+/* ─── Feedback Banner ──────────────────────────────────────────── */
+.feedback-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: #166534;
+  font-size: 13px;
+  font-weight: 500;
+}

@@ -11,6 +11,7 @@ import InvoiceDetail from './pages/InvoiceDetail'
 import Vendors from './pages/Vendors'
 import Reports from './pages/Reports'
 import ErrorLogs from './pages/ErrorLogs'
+import Users from './pages/Users'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +89,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
                   <AppLayout><ErrorLogs /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute requiredRoles={['super_admin']}>
+                  <AppLayout><Users /></AppLayout>
                 </ProtectedRoute>
               }
             />
