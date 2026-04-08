@@ -12,6 +12,7 @@ import Vendors from './pages/Vendors'
 import Reports from './pages/Reports'
 import ErrorLogs from './pages/ErrorLogs'
 import Users from './pages/Users'
+import AutomationRules from './pages/AutomationRules'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,6 +98,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRoles={['super_admin']}>
                   <AppLayout><Users /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/automation"
+              element={
+                <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
+                  <AppLayout><AutomationRules /></AppLayout>
                 </ProtectedRoute>
               }
             />
