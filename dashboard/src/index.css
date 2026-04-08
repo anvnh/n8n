@@ -956,3 +956,55 @@ img { max-width: 100%; }
   color: var(--text-muted);
   font-family: monospace;
 }
+
+/* ─── Settings Page ────────────────────────────────────────────── */
+.settings-section {
+  margin-bottom: 32px;
+}
+.settings-section-header {
+  margin-bottom: 16px;
+}
+.settings-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.settings-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--transition);
+}
+.settings-item:last-child {
+  border-bottom: none;
+}
+.settings-item:hover {
+  background: var(--bg-card-hover);
+}
+.settings-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.settings-item-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.settings-item-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.settings-item-control {
+  flex-shrink: 0;
+  margin-left: 24px;
+}

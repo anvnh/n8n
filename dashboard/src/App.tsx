@@ -14,6 +14,7 @@ import ErrorLogs from './pages/ErrorLogs'
 import Users from './pages/Users'
 import AutomationRules from './pages/AutomationRules'
 import AuditTrail from './pages/AuditTrail'
+import Settings from './pages/Settings'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -115,6 +116,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
                   <AppLayout><AuditTrail /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute requiredRoles={['super_admin']}>
+                  <AppLayout><Settings /></AppLayout>
                 </ProtectedRoute>
               }
             />
