@@ -13,6 +13,7 @@ import Reports from './pages/Reports'
 import ErrorLogs from './pages/ErrorLogs'
 import Users from './pages/Users'
 import AutomationRules from './pages/AutomationRules'
+import AuditTrail from './pages/AuditTrail'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,14 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
                   <AppLayout><AutomationRules /></AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit-trail"
+              element={
+                <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
+                  <AppLayout><AuditTrail /></AppLayout>
                 </ProtectedRoute>
               }
             />

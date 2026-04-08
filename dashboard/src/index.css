@@ -887,3 +887,72 @@ img { max-width: 100%; }
   font-size: 13px;
   font-weight: 500;
 }
+
+/* ─── Audit Trail Timeline ─────────────────────────────────────── */
+.audit-timeline {
+  padding: 16px 20px;
+}
+.audit-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: background var(--transition);
+}
+.audit-item:last-child {
+  border-bottom: none;
+}
+.audit-item:hover {
+  background: var(--bg-card-hover);
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.audit-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.audit-content {
+  flex: 1;
+  min-width: 0;
+}
+.audit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.audit-action {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.audit-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.audit-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.audit-details {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.audit-detail-tag {
+  display: inline-block;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: monospace;
+}
