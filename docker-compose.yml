@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL DB
   postgres:
-    # image: postgres:16
+    image: postgres:16
     container_name: postgres_db
     restart: always
     environment:
@@ -106,7 +106,7 @@ services:
       DB_NAME: finance_db
       DB_USER: n8n_user
       DB_PASSWORD: n8n_password
-      CORS_ORIGINS: http://localhost:5173,http://localhost:4173,http://134.122.80.208:5173
+      CORS_ORIGINS: http://localhost:5173,http://localhost:4173,http://localhost:3001,http://134.122.80.208:5173
     depends_on:
       - postgres
 
