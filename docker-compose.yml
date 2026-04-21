@@ -87,26 +87,6 @@ services:
     depends_on:
       - postgres
 
-  # Auth API (JWT Authentication)
-  auth-api:
-    build: ./auth-api
-    container_name: auth_api
-    restart: always
-    ports:
-      - "4000:4000"
-    environment:
-      AUTH_PORT: 4000
-      JWT_SECRET: 228d57c123dd6d46ef112981cc6d9dbea03ffaa2fe248addabe5980bd38443ffc61a49c34e62a317858fdc9aa640d7a42543836cc27566e6e688967c79e0fa84
-      JWT_EXPIRES_IN: 24h
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: finance_db
-      DB_USER: n8n_user
-      DB_PASSWORD: n8n_password
-      CORS_ORIGINS: http://localhost:5173,http://localhost:4173,http://localhost:3001,http://134.122.80.208:5173
-    depends_on:
-      - postgres
-
 volumes:
   postgres_data:
   pgadmin_data:
