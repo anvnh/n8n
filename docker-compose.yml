@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL DB
   postgres:
@@ -89,7 +87,6 @@ services:
     depends_on:
       - postgres
 
-
   # Auth API (JWT Authentication)
   auth-api:
     build: ./auth-api
@@ -99,7 +96,7 @@ services:
       - "4000:4000"
     environment:
       AUTH_PORT: 4000
-      JWT_SECRET: n8n_invoice_jwt_secret_2026
+      JWT_SECRET: 228d57c123dd6d46ef112981cc6d9dbea03ffaa2fe248addabe5980bd38443ffc61a49c34e62a317858fdc9aa640d7a42543836cc27566e6e688967c79e0fa84
       JWT_EXPIRES_IN: 24h
       DB_HOST: postgres
       DB_PORT: 5432
