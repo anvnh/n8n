@@ -7,22 +7,24 @@ export interface ApprovePayload {
 }
 
 export const approveInvoice = async (invoiceId: string): Promise<unknown> => {
-  const { data } = await axios.post('/webhook/approve-invoice', {
-    invoiceId,
-    action: 'approve',
+  const { data } = await axios.patch(`/api/invoices/${invoiceId}/status`, {
+    status: 'Approved',
   }, {
-    headers: { 'ngrok-skip-browser-warning': '1' }
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('auth_token') || ''}`,
+    },
   })
   return data
 }
 
 export const rejectInvoice = async (invoiceId: string, reason?: string): Promise<unknown> => {
-  const { data } = await axios.post('/webhook/approve-invoice', {
-    invoiceId,
-    action: 'reject',
+  const { data } = await axios.patch(`/api/invoices/${invoiceId}/status`, {
+    status: 'Rejected',
     reason: reason || 'Rejected by admin',
   }, {
-    headers: { 'ngrok-skip-browser-warning': '1' }
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('auth_token') || ''}`,
+    },
   })
   return data
 }

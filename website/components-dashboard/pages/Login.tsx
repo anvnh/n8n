@@ -1,17 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { signupApi } from '../api/auth'
 import { getRoleLabel } from '../auth/types'
 
 const DEMO_ACCOUNTS = [
   { email: 'super@demo.com', password: 'super123', role: 'super_admin' as const, name: 'Nguyễn Văn Anh' },
   { email: 'admin@demo.com', password: 'admin123', role: 'admin' as const, name: 'Trần Minh Tuấn' },
-  { email: 'client@demo.com', password: 'client123', role: 'client' as const, name: 'Lê Thị Hoa' },
+  { email: 'client@demo.com', password: 'client123', role: 'user' as const, name: 'Lê Thị Hoa' },
 ]
 
 export default function Login() {
+  const [isSignup, setIsSignup] = useState(false)
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -22,6 +26,14 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
+      if (isSignup) {
+        if (password !== confirmPassword) {
+          setError('Mật khẩu không khớp.')
+          setLoading(false)
+          return
+        }
+        await signupApi({ name, email, password })
+      }
       await login({ email, password })
       navigate('/', { replace: true })
     } catch (err: any) {
@@ -46,8 +58,10 @@ export default function Login() {
             <div className="login-logo">
               <div className="login-logo-icon">n8n</div>
             </div>
-            <h1 className="login-title">Welcome back</h1>
-            <p className="login-subtitle">Sign in to access the Invoice Dashboard</p>
+            <h1 className="login-title">{isSignup ? 'Create account' : 'Welcome back'}</h1>
+            <p className="login-subtitle">
+              {isSignup ? 'Sign up to access the Invoice Dashboard' : 'Sign in to access the Invoice Dashboard'}
+            </p>
           </div>
 
           {/* Error */}
@@ -59,6 +73,20 @@ export default function Login() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="login-form">
+            {isSignup && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="name">Full name</label>
+                <input
+                  id="name"
+                  type="text"
+                  className="input form-input"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label" htmlFor="email">Email</label>
               <input
@@ -82,50 +110,82 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
+                autoComplete={isSignup ? 'new-password' : 'current-password'}
               />
             </div>
+            {isSignup && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="confirmPassword">Confirm password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  className="input form-input"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                />
+              </div>
+            )}
             <button
               type="submit"
               className="btn btn-primary login-btn"
-              disabled={loading || !email || !password}
+              disabled={loading || !email || !password || (isSignup && !name)}
             >
               {loading ? (
                 <>
                   <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                  Signing in…
+                  {isSignup ? 'Creating…' : 'Signing in…'}
                 </>
               ) : (
-                'Sign In'
+                isSignup ? 'Create Account' : 'Sign In'
               )}
             </button>
           </form>
 
-          {/* Demo Accounts */}
           <div className="login-divider">
-            <span>Demo Accounts</span>
+            <span>{isSignup ? 'Already have an account?' : 'Need an account?'}</span>
           </div>
-          <div className="demo-accounts">
-            {DEMO_ACCOUNTS.map((acc) => (
-              <button
-                key={acc.email}
-                type="button"
-                className="demo-account-btn"
-                onClick={() => quickLogin(acc)}
-              >
-                <div className="demo-account-avatar">
-                  {acc.name.charAt(0)}
-                </div>
-                <div className="demo-account-info">
-                  <div className="demo-account-name">{acc.name}</div>
-                  <div className="demo-account-role">
-                    <span className={`badge badge-role-${acc.role}`}>{getRoleLabel(acc.role)}</span>
-                  </div>
-                </div>
-                <div className="demo-account-arrow">→</div>
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            className="btn btn-ghost login-btn"
+            onClick={() => {
+              setIsSignup((prev) => !prev)
+              setError('')
+            }}
+          >
+            {isSignup ? 'Back to Sign In' : 'Create new account'}
+          </button>
+
+          {!isSignup && (
+            <>
+              <div className="login-divider">
+                <span>Demo Accounts</span>
+              </div>
+              <div className="demo-accounts">
+                {DEMO_ACCOUNTS.map((acc) => (
+                  <button
+                    key={acc.email}
+                    type="button"
+                    className="demo-account-btn"
+                    onClick={() => quickLogin(acc)}
+                  >
+                    <div className="demo-account-avatar">
+                      {acc.name.charAt(0)}
+                    </div>
+                    <div className="demo-account-info">
+                      <div className="demo-account-name">{acc.name}</div>
+                      <div className="demo-account-role">
+                        <span className={`badge badge-role-${acc.role}`}>{getRoleLabel(acc.role)}</span>
+                      </div>
+                    </div>
+                    <div className="demo-account-arrow">→</div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="login-footer">

@@ -16,8 +16,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email, password, and name are required' }, { status: 400 })
     }
 
-    const validRoles = ['super_admin', 'admin', 'client']
-    const userRole = role || 'client'
+    const validRoles = ['super_admin', 'admin', 'client', 'user']
+    const incomingRole = role || 'client'
+    if (!validRoles.includes(incomingRole)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+    }
+    const userRole = incomingRole === 'user' ? 'client' : incomingRole
 
     const existing = await pool.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()])
     if (existing.rows.length > 0) {

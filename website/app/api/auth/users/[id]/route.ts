@@ -20,8 +20,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       values.push(name)
     }
     if (role !== undefined) {
+      const allowedRoles = ['super_admin', 'admin', 'client', 'user']
+      if (!allowedRoles.includes(role)) {
+        return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+      }
+      const normalizedRole = role === 'user' ? 'client' : role
       updates.push(`role = $${paramIndex++}`)
-      values.push(role)
+      values.push(normalizedRole)
     }
     if (is_active !== undefined) {
       updates.push(`is_active = $${paramIndex++}`)

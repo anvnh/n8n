@@ -190,7 +190,7 @@ export default function AutomationRules() {
                     <span className={`badge ${rule.is_active ? 'badge-active' : 'badge-inactive'}`}>
                       {rule.is_active ? 'Active' : 'Inactive'}
                     </span>
-                    <span className={`badge badge-role-${rule.rule_type === 'auto_approve' ? 'admin' : rule.rule_type === 'auto_reject' ? 'super_admin' : 'client'}`}>
+                    <span className={`badge badge-role-${rule.rule_type === 'auto_approve' ? 'admin' : rule.rule_type === 'auto_reject' ? 'super_admin' : 'user'}`}>
                       {RULE_TYPE_LABELS[rule.rule_type]}
                     </span>
                   </div>

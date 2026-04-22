@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
-import { getRoleLabel } from '../../auth/types'
+import { getRoleLabel, normalizeRole } from '../../auth/types'
 
 const pageNames: Record<string, string> = {
   '/': 'Dashboard',
@@ -74,8 +74,8 @@ export default function Topbar() {
             <div className="topbar-avatar">{initials}</div>
             <div className="topbar-user-info">
               <div className="topbar-user-name">{user?.name || 'User'}</div>
-              <span className={`badge badge-role-${user?.role || 'client'}`}>
-                {getRoleLabel(user?.role || 'client')}
+              <span className={`badge badge-role-${normalizeRole(user?.role || 'user')}`}>
+                {getRoleLabel(user?.role || 'user')}
               </span>
             </div>
           </button>

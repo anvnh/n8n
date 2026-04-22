@@ -3,6 +3,7 @@ import { useInvoices } from '../hooks/useInvoices'
 import { approveInvoice, rejectInvoice } from '../api/webhooks'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '../auth/AuthContext'
 
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>()
@@ -12,6 +13,8 @@ export default function InvoiceDetail() {
   const invoice = invoices.find((i) => i.invoiceId === id)
   const [loading, setLoading] = useState<'approve' | 'reject' | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
+  const { can } = useAuth()
+  const canApprove = can('approve_invoices')
 
   if (!invoice) {
     return (
@@ -25,6 +28,14 @@ export default function InvoiceDetail() {
   }
 
   const doAction = async (action: 'approve' | 'reject') => {
+    if (!canApprove) {
+      setFeedback('Bạn không có quyền duyệt hóa đơn.')
+      return
+    }
+    if (invoice.status !== 'Pending' || (invoice.priority || 'Normal') !== 'High') {
+      setFeedback('Only Pending + High priority invoices can be updated.')
+      return
+    }
     setLoading(action)
     setFeedback(null)
     try {
@@ -129,7 +140,7 @@ export default function InvoiceDetail() {
                   className="btn btn-success"
                   style={{ flex: 1, justifyContent: 'center' }}
                   onClick={() => doAction('approve')}
-                  disabled={!!loading}
+                  disabled={!!loading || !canApprove || (invoice.priority || 'Normal') !== 'High'}
                 >
                   {loading === 'approve' ? 'Processing…' : 'Approve Invoice'}
                 </button>
@@ -137,7 +148,7 @@ export default function InvoiceDetail() {
                   className="btn btn-danger"
                   style={{ flex: 1, justifyContent: 'center' }}
                   onClick={() => doAction('reject')}
-                  disabled={!!loading}
+                  disabled={!!loading || !canApprove || (invoice.priority || 'Normal') !== 'High'}
                 >
                   {loading === 'reject' ? 'Processing…' : 'Reject Invoice'}
                 </button>

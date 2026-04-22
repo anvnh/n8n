@@ -20,12 +20,17 @@ export interface Invoice {
 
 export const getInvoices = async (): Promise<Invoice[]> => {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_POSTGREST_BASE_URL || 'http://localhost:3000'
-    const { data } = await axios.get(`${baseUrl}/invoices`)
+    const token = localStorage.getItem('auth_token') || ''
+    const { data } = await axios.get('/api/invoices', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    const payload = data?.data ?? []
     
     // Fallback parsing just in case DB schema differs from the mock interface
-    if (Array.isArray(data)) {
-      return data.map((row: any) => ({
+    if (Array.isArray(payload)) {
+      return payload.map((row: any) => ({
         invoiceId: row.id || row.invoice_id || row.invoiceId || '',
         vendorId: row.vendor_id,
         sender: row.sender || '',
@@ -43,7 +48,7 @@ export const getInvoices = async (): Promise<Invoice[]> => {
         accountNumber: row.account_number || row.accountNumber || undefined,
       }))
     }
-    console.warn('[invoices.ts] API returned success, but data is NOT an array:', data)
+    console.warn('[invoices.ts] API returned success, but data is NOT an array:', payload)
     return []
   } catch (err: unknown) {
     console.error('[invoices.ts] PostgREST call failed with error:', err)

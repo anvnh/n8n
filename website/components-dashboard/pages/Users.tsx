@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react'
 import { getUsersApi, registerUserApi, updateUserApi, deleteUserApi } from '../api/auth'
 import { getRoleLabel } from '../auth/types'
 import type { User, UserRole } from '../auth/types'
+import { useAuth } from '../auth/AuthContext'
 
 export default function Users() {
+  const { user: currentUser } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -17,7 +19,7 @@ export default function Users() {
   const [formName, setFormName] = useState('')
   const [formEmail, setFormEmail] = useState('')
   const [formPassword, setFormPassword] = useState('')
-  const [formRole, setFormRole] = useState<UserRole>('client')
+  const [formRole, setFormRole] = useState<UserRole>('user')
   const [formSubmitting, setFormSubmitting] = useState(false)
 
   const fetchUsers = async () => {
@@ -41,7 +43,7 @@ export default function Users() {
     setFormName('')
     setFormEmail('')
     setFormPassword('')
-    setFormRole('client')
+    setFormRole('user')
     setShowModal(true)
   }
 
@@ -88,6 +90,21 @@ export default function Users() {
     }
   }
 
+  const handleToggleRole = async (user: User) => {
+    const nextRole = user.role === 'admin' ? 'user' : 'admin'
+    const label = nextRole === 'admin' ? 'Admin' : 'User'
+    if (!confirm(`Change role of "${user.name}" to ${label}?`)) return
+    try {
+      await updateUserApi(user.id, { role: nextRole })
+      setFeedback({ type: 'success', msg: `User "${user.name}" updated to ${label}.` })
+      fetchUsers()
+      clearFeedback()
+    } catch (err: any) {
+      setFeedback({ type: 'error', msg: err.response?.data?.error || 'Failed to update user role.' })
+      clearFeedback()
+    }
+  }
+
   const handleDelete = async (user: User) => {
     if (!confirm(`Are you sure you want to delete "${user.name}"? This action cannot be undone.`)) return
     try {
@@ -112,7 +129,7 @@ export default function Users() {
     all: users.length,
     super_admin: users.filter((u) => u.role === 'super_admin').length,
     admin: users.filter((u) => u.role === 'admin').length,
-    client: users.filter((u) => u.role === 'client').length,
+    user: users.filter((u) => u.role === 'user').length,
   }
 
   return (
@@ -137,7 +154,7 @@ export default function Users() {
 
       {/* Role filter tabs */}
       <div className="flex gap-8 mb-24" style={{ flexWrap: 'wrap' }}>
-        {(['all', 'super_admin', 'admin', 'client'] as const).map((r) => (
+        {(['all', 'super_admin', 'admin', 'user'] as const).map((r) => (
           <button
             key={r}
             className={roleFilter === r ? 'btn btn-primary btn-sm' : 'btn btn-ghost btn-sm'}
@@ -197,6 +214,11 @@ export default function Users() {
                     <td>
                       <div className="flex gap-8">
                         <button className="btn btn-ghost btn-sm" onClick={() => openEditModal(u)}>Edit</button>
+                        {currentUser?.role === 'super_admin' && u.role !== 'super_admin' && (
+                          <button className="btn btn-ghost btn-sm" onClick={() => handleToggleRole(u)}>
+                            {u.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
+                          </button>
+                        )}
                         <button className="btn btn-ghost btn-sm" onClick={() => handleToggleActive(u)}>
                           {u.is_active ? 'Deactivate' : 'Activate'}
                         </button>
@@ -266,7 +288,7 @@ export default function Users() {
                     value={formRole}
                     onChange={(e) => setFormRole(e.target.value as UserRole)}
                   >
-                    <option value="client">Client</option>
+                    <option value="user">User</option>
                     <option value="admin">Admin</option>
                     <option value="super_admin">Super Admin</option>
                   </select>

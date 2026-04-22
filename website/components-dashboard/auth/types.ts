@@ -1,6 +1,7 @@
 // ─── Role & Permission Types ──────────────────────────────────
 
-export type UserRole = 'super_admin' | 'admin' | 'client'
+export type UserRole = 'super_admin' | 'admin' | 'user'
+export type StoredUserRole = UserRole | 'client'
 
 export interface User {
   id: number
@@ -66,8 +67,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_audit_trail',
     'manage_vendors',
   ],
-  client: [
+  user: [
     'view_dashboard',
+    'view_all_invoices',
   ],
 }
 
@@ -75,11 +77,22 @@ export function hasPermission(role: UserRole, permission: Permission): boolean {
   return ROLE_PERMISSIONS[role]?.includes(permission) ?? false
 }
 
-export function getRoleLabel(role: UserRole): string {
+export function normalizeRole(role: StoredUserRole): UserRole {
+  if (role === 'client') return 'user'
+  return role
+}
+
+export function denormalizeRole(role: UserRole): StoredUserRole {
+  if (role === 'user') return 'client'
+  return role
+}
+
+export function getRoleLabel(role: UserRole | StoredUserRole): string {
   const labels: Record<UserRole, string> = {
     super_admin: 'Super Admin',
     admin: 'Admin',
-    client: 'Client',
+    user: 'User',
   }
-  return labels[role] || role
+  const normalized = normalizeRole(role as StoredUserRole)
+  return labels[normalized] || normalized
 }

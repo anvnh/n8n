@@ -342,6 +342,40 @@ img { max-width: 100%; }
 .badge-active   { background: #ffffff; color: #000000; border: 1px solid #000000; }
 .badge-inactive { background: #fafafa; color: #a1a1aa; border: 1px solid #e4e4e7; }
 
+.badge-role-client {
+  background: #fff;
+  color: #71717a;
+  border: 1px solid #e4e4e7;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge-role-user {
+  background: #fff;
+  color: #71717a;
+  border: 1px solid #e4e4e7;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.badge-role-user {
+  background: #f4f4f5;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
 /* ─── Buttons ─────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useInvoices } from "../hooks/useInvoices";
 import { approveInvoice, rejectInvoice } from "../api/webhooks";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../auth/AuthContext";
 import type { Invoice } from "../api/invoices";
 
 type Status = "All" | "Pending" | "Approved" | "Rejected" | "Paid";
@@ -26,6 +27,8 @@ function formatDate(value?: string) {
 export default function Invoices() {
   const { data: invoices = [], isLoading, error } = useInvoices();
   const qc = useQueryClient();
+  const { can } = useAuth();
+  const canApprove = can("approve_invoices");
   const [filter, setFilter] = useState<Status>("All");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState<string | null>(null);
@@ -51,6 +54,25 @@ export default function Invoices() {
   };
 
   const doAction = async (id: string, action: "approve" | "reject") => {
+    const invoice = invoices.find((inv) => inv.invoiceId === id);
+    if (!invoice) {
+      setFeedback({ type: "error", msg: `Invoice ${id} not found.` });
+      return;
+    }
+    if (!canApprove) {
+      setFeedback({
+        type: "error",
+        msg: "Bạn không có quyền duyệt hóa đơn.",
+      });
+      return;
+    }
+    if (invoice.status !== "Pending" || (invoice.priority || "Normal") !== "High") {
+      setFeedback({
+        type: "error",
+        msg: "Only Pending + High priority invoices can be updated.",
+      });
+      return;
+    }
     setLoading(`${id}-${action}`);
     setFeedback(null);
     try {
@@ -210,7 +232,11 @@ export default function Invoices() {
                           <button
                             className="btn btn-success btn-sm"
                             onClick={() => doAction(inv.invoiceId, "approve")}
-                            disabled={loading === `${inv.invoiceId}-approve`}
+                            disabled={
+                              loading === `${inv.invoiceId}-approve` ||
+                              (inv.priority || "Normal") !== "High" ||
+                              !canApprove
+                            }
                           >
                             {loading === `${inv.invoiceId}-approve`
                               ? "…"
@@ -219,7 +245,11 @@ export default function Invoices() {
                           <button
                             className="btn btn-danger btn-sm"
                             onClick={() => doAction(inv.invoiceId, "reject")}
-                            disabled={loading === `${inv.invoiceId}-reject`}
+                            disabled={
+                              loading === `${inv.invoiceId}-reject` ||
+                              (inv.priority || "Normal") !== "High" ||
+                              !canApprove
+                            }
                           >
                             {loading === `${inv.invoiceId}-reject`
                               ? "…"
