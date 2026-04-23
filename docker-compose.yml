@@ -4,10 +4,7 @@ services:
     image: postgres:16
     container_name: postgres_db
     restart: always
-    environment:
-      - POSTGRES_USER=n8n_user
-      - POSTGRES_PASSWORD=n8n_password
-      - POSTGRES_DB=finance_db
+    env_file: .env.postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -18,9 +15,7 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin_web
     restart: always
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
+    env_file: .env.pgadmin
     ports:
       - "5050:80"
     volumes:
@@ -41,32 +36,9 @@ services:
     image: docker.n8n.io/n8nio/n8n
     container_name: n8n_app
     restart: always
+    env_file: .env.n8n
     ports:
       - "5678:5678"
-    environment:
-      # - N8N_HOST=localhost
-      # - N8N_PORT=5678
-      # - N8N_PROTOCOL=http
-      # - NODE_ENV=production
-      # - WEBHOOK_URL=https://n8naan.duckdns.org:5678
-      # - DB_TYPE=postgresdb
-      # - DB_POSTGRESDB_HOST=postgres
-      # - DB_POSTGRESDB_PORT=5432
-      # - DB_POSTGRESDB_DATABASE=finance_db
-      # - DB_POSTGRESDB_USER=n8n_user
-      # - DB_POSTGRESDB_PASSWORD=n8n_password
-
-      - N8N_HOST=0.0.0.0
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=https
-      - NODE_ENV=production
-      - WEBHOOK_URL=https://n8naan.duckdns.org/
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=finance_db
-      - DB_POSTGRESDB_USER=n8n_user
-      - DB_POSTGRESDB_PASSWORD=n8n_password
     volumes:
       - ./n8n_data:/home/node/.n8n
       - ./workflows:/home/node/workflows
@@ -78,12 +50,9 @@ services:
     image: postgrest/postgrest
     container_name: postgrest_api
     restart: always
+    env_file: .env.postgrest
     ports:
       - "3000:3000"
-    environment:
-      PGRST_DB_URI: postgres://n8n_user:n8n_password@postgres:5432/finance_db
-      PGRST_DB_SCHEMA: public
-      PGRST_DB_ANON_ROLE: n8n_user
     depends_on:
       - postgres
 
