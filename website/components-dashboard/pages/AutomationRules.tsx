@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
+import { useAuth } from '../auth/AuthContext'
 
 interface AutoRule {
   id: number
@@ -29,6 +30,7 @@ const RULE_TYPE_LABELS: Record<string, string> = {
 
 export default function AutomationRules() {
   const qc = useQueryClient()
+  const { user } = useAuth()
   const { data: rules = [], isLoading } = useQuery({ queryKey: ['auto_rules'], queryFn: fetchRules })
   const [showModal, setShowModal] = useState(false)
   const [editRule, setEditRule] = useState<AutoRule | null>(null)
@@ -129,6 +131,22 @@ export default function AutomationRules() {
     }
   }
 
+  const seedRules = async () => {
+    try {
+      await axios.post('/api/auto-rules/seed', null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('auth_token') || ''}`,
+        },
+      })
+      setFeedback({ type: 'success', msg: 'Sample rules created.' })
+      qc.invalidateQueries({ queryKey: ['auto_rules'] })
+      clearFeedback()
+    } catch (err: any) {
+      setFeedback({ type: 'error', msg: err.response?.data?.error || 'Failed to seed rules.' })
+      clearFeedback()
+    }
+  }
+
   const activeCount = rules.filter((r) => r.is_active).length
 
   return (
@@ -177,6 +195,11 @@ export default function AutomationRules() {
             <div className="empty-icon">⚡</div>
             <p>No automation rules yet.</p>
             <p className="text-sm text-muted mt-4">Create your first rule to automate invoice processing.</p>
+            {user?.role && ['super_admin', 'admin'].includes(user.role) && (
+              <button className="btn btn-ghost btn-sm mt-12" onClick={seedRules}>
+                Seed sample rules
+              </button>
+            )}
           </div>
         </div>
       ) : (

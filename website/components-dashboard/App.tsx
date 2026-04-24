@@ -12,8 +12,6 @@ import Vendors from './pages/Vendors'
 import Reports from './pages/Reports'
 import ErrorLogs from './pages/ErrorLogs'
 import Users from './pages/Users'
-import AutomationRules from './pages/AutomationRules'
-import AuditTrail from './pages/AuditTrail'
 import Settings from './pages/Settings'
 
 const queryClient = new QueryClient({
@@ -100,22 +98,6 @@ export default function App() {
               element={
                 <ProtectedRoute requiredRoles={['super_admin']}>
                   <AppLayout><Users /></AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/automation"
-              element={
-                <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
-                  <AppLayout><AutomationRules /></AppLayout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/audit-trail"
-              element={
-                <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
-                  <AppLayout><AuditTrail /></AppLayout>
                 </ProtectedRoute>
               }
             />

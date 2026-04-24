@@ -28,13 +28,6 @@ const navItems: NavGroup[] = [
     items: [
       { to: '/reports',    label: 'Reports',    roles: ['super_admin', 'admin'] },
       { to: '/error-logs', label: 'Error Logs', roles: ['super_admin', 'admin'] },
-      { to: '/audit-trail', label: 'Audit Trail', roles: ['super_admin', 'admin'] },
-    ],
-  },
-  {
-    group: 'Automation',
-    items: [
-      { to: '/automation', label: 'Auto Rules', roles: ['super_admin', 'admin'] },
     ],
   },
   {

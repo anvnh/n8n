@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { verifyToken } from '../../../../../lib/auth'
+import { pool } from '../../../../../lib/db'
 
 type UpdateStatus = 'Approved' | 'Rejected'
 
@@ -32,8 +33,9 @@ const handleUpdate = async (req: Request, id?: string) => {
     return NextResponse.json({ error: 'Invoice id is required' }, { status: 400 })
   }
 
+  let userPayload: { userId: number; name?: string; role: string } | null = null
   try {
-    const userPayload = verifyToken(req)
+    userPayload = verifyToken(req) as { userId: number; name?: string; role: string }
     if (!['super_admin', 'admin'].includes(userPayload.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -84,6 +86,23 @@ const handleUpdate = async (req: Request, id?: string) => {
       },
       { status: 409 }
     )
+  }
+
+  try {
+    const action = status === 'Approved' ? 'approve' : 'reject'
+    await pool.query(
+      `INSERT INTO audit_logs (user_id, user_name, action, target_type, target_id, details)
+       VALUES ($1, $2, $3, 'invoice', $4, $5)`,
+      [
+        userPayload?.userId || null,
+        userPayload?.name || null,
+        action,
+        id,
+        JSON.stringify({ status, reason: reason || null }),
+      ]
+    )
+  } catch (err) {
+    console.error('[audit_logs] failed to insert approve/reject log', err)
   }
 
   return NextResponse.json({ data: data[0] })

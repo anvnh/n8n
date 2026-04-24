@@ -258,12 +258,6 @@ export default function Settings() {
             </div>
             <div className="settings-item-control text-sm text-muted">PostgREST + Auth API</div>
           </div>
-          <div className="settings-item">
-            <div className="settings-item-info">
-              <div className="settings-item-label">Automation</div>
-            </div>
-            <div className="settings-item-control text-sm text-muted">n8n Workflow Engine</div>
-          </div>
         </div>
       </div>
     </div>

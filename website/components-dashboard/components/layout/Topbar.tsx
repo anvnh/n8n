@@ -9,8 +9,6 @@ const pageNames: Record<string, string> = {
   '/vendors': 'Vendors',
   '/reports': 'Reports',
   '/error-logs': 'Error Logs',
-  '/audit-trail': 'Audit Trail',
-  '/automation': 'Automation Rules',
   '/users': 'User Management',
   '/settings': 'Settings',
 }

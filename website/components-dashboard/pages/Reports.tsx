@@ -100,7 +100,7 @@ export default function Reports() {
             </div>
           </div>
           <div className="chart-wrap">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height={260} minWidth={0}>
               <BarChart data={weeklyData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="week" tick={{ fontSize: 12, fill: '#8892b0' }} />
@@ -133,7 +133,7 @@ export default function Reports() {
           <div className="card-title">Invoice Status Breakdown</div>
           <div className="chart-wrap">
             {pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height={260} minWidth={0}>
                 <PieChart>
                   <Pie data={pieData} cx="50%" cy="45%" outerRadius={90} innerRadius={50} dataKey="value" paddingAngle={3}>
                     {pieData.map((_, i) => (
