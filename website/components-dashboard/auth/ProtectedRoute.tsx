@@ -8,13 +8,22 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading, user } = useAuth()
+  const { isAuthenticated, isLoading, user, systemSettings, settingsLoading } = useAuth()
 
-  if (isLoading) {
+  if (isLoading || settingsLoading) {
     return (
       <div className="spinner-wrap" style={{ minHeight: '100vh' }}>
         <div className="spinner" />
         <span>Loading...</span>
+      </div>
+    )
+  }
+  if (systemSettings.maintenanceMode && user?.role && !['super_admin', 'admin'].includes(user.role)) {
+    return (
+      <div className="empty-state" style={{ minHeight: '100vh' }}>
+        <div className="empty-icon">🛠️</div>
+        <h2>Maintenance mode</h2>
+        <p>System is under maintenance. Please try again later.</p>
       </div>
     )
   }

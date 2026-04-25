@@ -1,36 +1,26 @@
-import { useState } from 'react'
-
-interface SystemSettings {
-  autoApprovalThreshold: number
-  emailNotifications: boolean
-  slackNotifications: boolean
-  maxInvoiceAmount: number
-  requireDoubleApproval: boolean
-  sessionTimeout: number
-  maintenanceMode: boolean
-}
-
-const DEFAULT_SETTINGS: SystemSettings = {
-  autoApprovalThreshold: 500,
-  emailNotifications: true,
-  slackNotifications: false,
-  maxInvoiceAmount: 100000,
-  requireDoubleApproval: false,
-  sessionTimeout: 24,
-  maintenanceMode: false,
-}
+import { useEffect, useState } from 'react'
+import { DEFAULT_SETTINGS, type SystemSettings } from '../constants/settings'
+import { getSystemSettings, saveSystemSettings } from '../api/settings'
 
 export default function Settings() {
-  const [settings, setSettings] = useState<SystemSettings>(() => {
-    try {
-      const stored = localStorage.getItem('system_settings')
-      return stored ? { ...DEFAULT_SETTINGS, ...JSON.parse(stored) } : DEFAULT_SETTINGS
-    } catch {
-      return DEFAULT_SETTINGS
-    }
-  })
+  const [settings, setSettings] = useState<SystemSettings>(DEFAULT_SETTINGS)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await getSystemSettings()
+        setSettings({ ...DEFAULT_SETTINGS, ...data })
+      } catch {
+        setFeedback({ type: 'error', msg: 'Failed to load settings.' })
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [])
 
   const updateSetting = <K extends keyof SystemSettings>(key: K, value: SystemSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
@@ -38,20 +28,27 @@ export default function Settings() {
 
   const handleSave = () => {
     setSaving(true)
-    setTimeout(() => {
-      localStorage.setItem('system_settings', JSON.stringify(settings))
-      setFeedback({ type: 'success', msg: 'Settings saved successfully.' })
-      setSaving(false)
-      setTimeout(() => setFeedback(null), 3000)
-    }, 500)
+    saveSystemSettings(settings)
+      .then((data) => {
+        setSettings({ ...DEFAULT_SETTINGS, ...data })
+        setFeedback({ type: 'success', msg: 'Settings saved successfully.' })
+      })
+      .catch(() => {
+        setFeedback({ type: 'error', msg: 'Failed to save settings.' })
+      })
+      .finally(() => {
+        setSaving(false)
+        setTimeout(() => setFeedback(null), 3000)
+      })
   }
 
   const handleReset = () => {
     if (!confirm('Reset all settings to default values?')) return
     setSettings(DEFAULT_SETTINGS)
-    localStorage.removeItem('system_settings')
-    setFeedback({ type: 'success', msg: 'Settings reset to defaults.' })
-    setTimeout(() => setFeedback(null), 3000)
+    saveSystemSettings(DEFAULT_SETTINGS)
+      .then(() => setFeedback({ type: 'success', msg: 'Settings reset to defaults.' }))
+      .catch(() => setFeedback({ type: 'error', msg: 'Failed to reset settings.' }))
+      .finally(() => setTimeout(() => setFeedback(null), 3000))
   }
 
   return (
@@ -76,6 +73,11 @@ export default function Settings() {
           {feedback.msg}
         </div>
       )}
+
+      {loading ? (
+        <div className="spinner-wrap"><div className="spinner" /><span>Loading settings…</span></div>
+      ) : (
+        <>
 
       {/* Invoice Processing */}
       <div className="settings-section">
@@ -260,6 +262,8 @@ export default function Settings() {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }

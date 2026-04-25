@@ -2,11 +2,16 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 import type { User, LoginCredentials, AuthState, Permission, UserRole } from './types'
 import { hasPermission } from './types'
 import { loginApi, getMeApi } from '../api/auth'
+import { getSystemSettings } from '../api/settings'
+import { DEFAULT_SETTINGS, type SystemSettings } from '../constants/settings'
 
 interface AuthContextValue extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>
   logout: () => void
   can: (permission: Permission) => boolean
+  systemSettings: SystemSettings
+  settingsLoading: boolean
+  refreshSettings: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -25,8 +30,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   })
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY))
   const [isLoading, setIsLoading] = useState(true)
+  const [systemSettings, setSystemSettings] = useState<SystemSettings>(DEFAULT_SETTINGS)
+  const [settingsLoading, setSettingsLoading] = useState(false)
 
   const isAuthenticated = !!token && !!user
+
+  const refreshSettings = useCallback(async () => {
+    setSettingsLoading(true)
+    try {
+      const settings = await getSystemSettings()
+      setSystemSettings({ ...DEFAULT_SETTINGS, ...settings })
+    } catch {
+      setSystemSettings(DEFAULT_SETTINGS)
+    } finally {
+      setSettingsLoading(false)
+    }
+  }, [])
 
   // Verify token on mount
   useEffect(() => {
@@ -39,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const me = await getMeApi()
         setUser(me)
         localStorage.setItem(USER_KEY, JSON.stringify(me))
+        await refreshSettings()
       } catch {
         // Token expired or invalid
         setToken(null)
@@ -50,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     verify()
-  }, [token])
+  }, [token, refreshSettings])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const response = await loginApi(credentials)
@@ -58,7 +78,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.user)
     localStorage.setItem(TOKEN_KEY, response.token)
     localStorage.setItem(USER_KEY, JSON.stringify(response.user))
-  }, [])
+    await refreshSettings()
+  }, [refreshSettings])
 
   const logout = useCallback(() => {
     setToken(null)
@@ -66,6 +87,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USER_KEY)
   }, [])
+
+  useEffect(() => {
+    if (!token) return
+    let lastActive = Date.now()
+    const updateActivity = () => {
+      lastActive = Date.now()
+    }
+    const interval = setInterval(() => {
+      const timeoutMs = systemSettings.sessionTimeout * 60 * 60 * 1000
+      if (timeoutMs > 0 && Date.now() - lastActive > timeoutMs) {
+        logout()
+      }
+    }, 60 * 1000)
+
+    window.addEventListener('mousemove', updateActivity)
+    window.addEventListener('keydown', updateActivity)
+    window.addEventListener('click', updateActivity)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('mousemove', updateActivity)
+      window.removeEventListener('keydown', updateActivity)
+      window.removeEventListener('click', updateActivity)
+    }
+  }, [token, systemSettings.sessionTimeout, logout])
 
   const can = useCallback(
     (permission: Permission) => {
@@ -76,7 +122,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, isLoading, login, logout, can }}>
+    <AuthContext.Provider value={{
+      user,
+      token,
+      isAuthenticated,
+      isLoading,
+      login,
+      logout,
+      can,
+      systemSettings,
+      settingsLoading,
+      refreshSettings,
+    }}>
       {children}
     </AuthContext.Provider>
   )

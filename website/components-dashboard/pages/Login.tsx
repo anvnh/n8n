@@ -158,34 +158,6 @@ export default function Login() {
             {isSignup ? 'Back to Sign In' : 'Create new account'}
           </button>
 
-          {!isSignup && (
-            <>
-              <div className="login-divider">
-                <span>Demo Accounts</span>
-              </div>
-              <div className="demo-accounts">
-                {DEMO_ACCOUNTS.map((acc) => (
-                  <button
-                    key={acc.email}
-                    type="button"
-                    className="demo-account-btn"
-                    onClick={() => quickLogin(acc)}
-                  >
-                    <div className="demo-account-avatar">
-                      {acc.name.charAt(0)}
-                    </div>
-                    <div className="demo-account-info">
-                      <div className="demo-account-name">{acc.name}</div>
-                      <div className="demo-account-role">
-                        <span className={`badge badge-role-${acc.role}`}>{getRoleLabel(acc.role)}</span>
-                      </div>
-                    </div>
-                    <div className="demo-account-arrow">→</div>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
         </div>
 
         <div className="login-footer">
